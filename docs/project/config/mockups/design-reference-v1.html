@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MultiTerm — Design Reference v1</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg-2: #111827;
+    --panel: #1f2937;
+    --panel-2: #1e293b;
+    --panel-3: #312e4d;
+    --border: #374151;
+    --border-soft: #4b5563;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --dim: #6b7280;
+    --accent: #60a5fa;
+    --accent-strong: #3b82f6;
+    --green: #22c55e;
+    --blue: #60a5fa;
+    --yellow: #fbbf24;
+    --red: #ef4444;
+    --purple: #a78bfa;
+    --term-bg: #000;
+    --term-text: #86efac;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
+    line-height: 1.6;
+  }
+  header { max-width: 1080px; margin: 0 auto 48px; }
+  h1 { font-size: 28px; margin: 0 0 8px; }
+  h2 { font-size: 18px; margin: 0 0 12px; color: var(--accent); letter-spacing: 0.5px; }
+  h3 { font-size: 14px; margin: 16px 0 8px; color: var(--muted); }
+  p { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+  .lede { color: var(--text); font-size: 15px; }
+  section { max-width: 1080px; margin: 0 auto 56px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  .label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .mono { font-family: "SF Mono", Menlo, Monaco, Consolas, monospace; }
+  .note { background: var(--panel-2); border-left: 3px solid var(--accent); padding: 10px 14px; margin: 12px 0; font-size: 13px; color: var(--text); }
+
+  /* swatches */
+  .swatches { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+  .swatch { background: var(--panel); border-radius: 8px; padding: 12px 14px; }
+  .swatch .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+  .swatch .name { font-size: 13px; font-weight: 600; }
+  .swatch .desc { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* mock building blocks */
+  .mock { background: var(--panel-2); border-radius: 10px; padding: 16px; margin: 12px 0; }
+  .mock-title { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+
+  .pill { background: var(--panel); padding: 6px 10px; border-radius: 4px; font-size: 11px; display: inline-flex; align-items: center; gap: 6px; }
+  .pill.active { background: var(--border); }
+
+  .term { background: var(--term-bg); padding: 10px; border-radius: 4px; color: var(--term-text); font-family: "SF Mono", Menlo, monospace; font-size: 11px; line-height: 1.7; }
+
+  .toggle { display: flex; gap: 6px; padding: 6px; background: var(--bg); border-radius: 6px; }
+  .toggle .seg { padding: 8px 18px; font-size: 12px; color: var(--muted); border-radius: 4px; cursor: pointer; }
+  .toggle .seg.active.dev { background: var(--accent-strong); color: #fff; font-weight: 600; }
+  .toggle .seg.active.prod { background: var(--purple); color: var(--bg); font-weight: 600; }
+
+  .sidebar-mock { width: 200px; background: var(--panel); padding: 10px; border-radius: 6px; }
+  .sidebar-mock .group-label { font-size: 9px; letter-spacing: 1px; margin: 12px 0 6px; padding-left: 4px; }
+  .sidebar-mock .group-label.dev { color: var(--accent); }
+  .sidebar-mock .group-label.prod { color: var(--purple); }
+  .sidebar-mock .row { padding: 6px 8px; font-size: 11px; border-radius: 4px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+  .sidebar-mock .row.active { background: var(--border); }
+  .sidebar-mock .ago { color: var(--dim); font-size: 9px; }
+  .add-btn { margin-top: 12px; padding: 6px; border: 1px dashed var(--border-soft); border-radius: 4px; text-align: center; color: var(--accent); font-size: 10px; }
+
+  .tabs { display: flex; gap: 4px; margin-bottom: 6px; flex-wrap: wrap; }
+  .tab { padding: 6px 12px; border-radius: 4px 4px 0 0; font-size: 11px; }
+  .tab.active { background: var(--border); border-bottom: 2px solid var(--accent); color: var(--text); }
+  .tab.inactive { background: var(--panel); color: var(--muted); }
+
+  .row-flex { display: flex; gap: 8px; align-items: stretch; }
+  .icon-strip { width: 48px; background: var(--panel); padding: 10px 4px; border-radius: 6px; text-align: center; }
+  .icon-strip .icon { padding: 8px 0; font-size: 11px; position: relative; margin-bottom: 4px; border-radius: 4px; }
+  .icon-strip .icon.active { background: var(--border); }
+  .icon-strip .icon .dot { position: absolute; top: 2px; right: 4px; font-size: 8px; }
+
+  .files-mock { width: 150px; background: var(--panel); padding: 10px; border-radius: 6px; }
+  .files-mock .item { font-size: 11px; line-height: 1.7; }
+
+  .panel { background: var(--panel-2); padding: 14px; border-radius: 8px; margin-bottom: 10px; }
+  .panel-label { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+  .row-buttons { display: flex; gap: 8px; }
+  .btn { padding: 8px 16px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+  .btn.primary-purple { background: var(--purple); color: var(--bg); font-weight: 600; }
+  .btn.primary-blue { background: var(--accent-strong); color: #fff; font-weight: 600; }
+  .btn.secondary { background: var(--border); color: var(--text); }
+
+  .url-row { font-size: 12px; line-height: 2; }
+
+  .tray-icon { display: inline-flex; align-items: center; gap: 6px; background: var(--panel); padding: 6px 10px; border-radius: 4px; font-size: 12px; }
+  .tray-badge { background: var(--red); color: #fff; padding: 1px 6px; border-radius: 8px; font-size: 10px; font-weight: 700; margin-left: 4px; }
+
+  .popover-mock { background: rgba(31,41,55,0.96); backdrop-filter: blur(8px); padding: 12px; border-radius: 12px; border: 1px solid var(--border); max-width: 540px; }
+  .popover-mock .pills-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; }
+  .popover-pill { background: var(--panel); padding: 6px 10px; border-radius: 14px; font-size: 11px; display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .popover-pill.selected { background: var(--accent-strong); color: #fff; }
+
+  .ports-chip { display: inline-block; background: var(--bg-2); padding: 2px 6px; border-radius: 3px; font-size: 9px; color: var(--muted); margin-left: 4px; font-family: "SF Mono", Menlo, monospace; }
+
+  .check-row { display: flex; gap: 8px; padding: 6px 0; font-size: 13px; }
+  .check-row .icon { width: 16px; }
+  .check-row.pass .icon { color: var(--green); }
+  .check-row.fail .icon { color: var(--red); }
+  .check-row.warn .icon { color: var(--yellow); }
+
+  .toc { background: var(--panel-2); padding: 16px 20px; border-radius: 10px; }
+  .toc h2 { color: var(--text); margin-bottom: 12px; }
+  .toc a { display: block; padding: 4px 0; color: var(--accent); text-decoration: none; font-size: 13px; }
+  .toc a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>MultiTerm — Design Reference v1</h1>
+  <p class="lede">Visual decisions locked during brainstorm dialogue on 2026-04-28. Companion to <code>docs/project/config/brainstorm.md</code>. Open this file in any browser; all styles are inline. Wireframes show structure and color, not pixel-perfect typography.</p>
+  <div class="toc">
+    <h2>Contents</h2>
+    <a href="#states">1. Terminal state taxonomy (6 colors)</a>
+    <a href="#layout">2. Overall app layout — Layout C</a>
+    <a href="#sidebar">3. Project sidebar — pills, icon-strip mode, lifecycle filter</a>
+    <a href="#toggle">4. Top-of-app DEV/PROD toggle</a>
+    <a href="#tabs">5. Terminal tabs within a project (DEV mode)</a>
+    <a href="#prod">6. PROD project view</a>
+    <a href="#promotion">7. DEV→PROD promotion validation dialog</a>
+    <a href="#ports">8. Port management — chip + panel + conflict UX</a>
+    <a href="#tray">9. Mac menu bar tray widget</a>
+  </div>
+</header>
+
+<!-- ───── 1. STATE TAXONOMY ───── -->
+<section id="states">
+  <h2>1. Terminal state taxonomy — 6 colors</h2>
+  <p>Each terminal is in exactly one state at any moment. Project pill aggregates to the most-urgent state across its terminals. <strong><code>done-unack</code> auto-clears the moment the user focuses that tab.</strong></p>
+  <div class="swatches">
+    <div class="swatch"><span class="dot" style="background:#6b7280"></span><span class="name">idle</span><div class="desc">Gray. Shell prompt waiting / no Claude session active.</div></div>
+    <div class="swatch"><span class="dot" style="background:var(--green)"></span><span class="name">running</span><div class="desc">Green. Claude is thinking, or a process is actively executing.</div></div>
+    <div class="swatch"><span class="dot" style="background:var(--blue)"></span><span class="name">awaiting-input</span><div class="desc">Blue. Claude returned a question, waiting on user.</div></div>
+    <div class="swatch"><span class="dot" style="background:var(--yellow)"></span><span class="name">needs-permission</span><div class="desc">Yellow. A tool call requires explicit approval.</div></div>
+    <div class="swatch"><span class="dot" style="background:var(--red)"></span><span class="name">error</span><div class="desc">Red. Process exited non-zero, or Claude reported an error.</div></div>
+    <div class="swatch"><span class="dot" style="background:var(--purple)"></span><span class="name">done-unack</span><div class="desc">Purple. Just finished — clears the moment user focuses the tab.</div></div>
+  </div>
+  <h3>Aggregation priority (project pill picks the highest)</h3>
+  <p><span style="color:var(--red)">error</span> &nbsp;&gt;&nbsp; <span style="color:var(--yellow)">needs-permission</span> &nbsp;&gt;&nbsp; <span style="color:var(--blue)">awaiting-input</span> &nbsp;&gt;&nbsp; <span style="color:var(--purple)">done-unack</span> &nbsp;&gt;&nbsp; <span style="color:var(--green)">running</span> &nbsp;&gt;&nbsp; <span style="color:var(--dim)">idle</span></p>
+</section>
+
+<!-- ───── 2. APP LAYOUT ───── -->
+<section id="layout">
+  <h2>2. Overall app layout — Layout C with collapsible side panels</h2>
+  <p>Project sidebar collapses to a 48px icon strip. File tree is pin/unpin (default pinned). Terminal area dominates remaining space.</p>
+  <div class="mock">
+    <div class="mock-title">Expanded — both side panels visible</div>
+    <div class="row-flex" style="height:280px;">
+      <div class="sidebar-mock">
+        <div class="group-label dev">PROJECTS · DEV</div>
+        <div class="row active"><span><span style="color:var(--green)">●</span> zemaster</span><span class="ago">1h</span></div>
+        <div class="row"><span><span style="color:var(--dim)">○</span> MultiTerm</span><span class="ago">16h</span></div>
+        <div class="row"><span><span style="color:var(--red)">●</span> Stocks</span><span class="ago">2m</span></div>
+        <div class="add-btn">+ Add Project</div>
+      </div>
+      <div class="files-mock">
+        <div class="label">FILES</div>
+        <div class="item">▸ src/</div>
+        <div class="item">▸ docs/</div>
+        <div class="item">▸ tests/</div>
+        <div class="item">&nbsp;&nbsp;package.json</div>
+        <div class="item">&nbsp;&nbsp;README.md</div>
+      </div>
+      <div style="flex:1; background:var(--bg-2); padding:10px; border-radius:6px;">
+        <div class="label" style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>TERMINALS</span><span style="color:var(--dim)">[ T1 ] [ T2 ] [ + ]</span></div>
+        <div class="term" style="height:200px;">$ claude<br/><span style="color:var(--yellow)">● Plan agent</span> · skill: brainstorming<br/>⏵ Reading docs/architecture.md<br/>⏵ Found 12 references in 4 files<br/><br/>I have 3 questions before I can finish the plan...<br/><span style="color:var(--blue)">awaiting your input ▌</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mock">
+    <div class="mock-title">Compact — sidebar collapsed to icon strip</div>
+    <div class="row-flex" style="height:240px;">
+      <div class="icon-strip">
+        <div class="icon active">Z<span class="dot" style="color:var(--green)">●</span></div>
+        <div class="icon">M<span class="dot" style="color:var(--dim)">○</span></div>
+        <div class="icon">S<span class="dot" style="color:var(--red)">●</span></div>
+      </div>
+      <div class="files-mock">
+        <div class="label">FILES</div>
+        <div class="item">▸ src/</div>
+        <div class="item">▸ docs/</div>
+      </div>
+      <div style="flex:1; background:var(--bg-2); padding:10px; border-radius:6px;">
+        <div class="label" style="margin-bottom:6px;">TERMINALS — wider</div>
+        <div class="term" style="height:170px;">$ claude · awaiting input ▌</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">Both panels (projects, files) have pin/unpin toggles. The terminal area always remains the dominant space.</div>
+</section>
+
+<!-- ───── 3. SIDEBAR ───── -->
+<section id="sidebar">
+  <h2>3. Project sidebar — pills, icon-strip, lifecycle filter</h2>
+  <p>Each project pill: status dot · name · last-active timestamp (relative — "2m", "1h", "3d", "24 avr.") · optional ports chip. Active project is highlighted.</p>
+  <h3>Pill examples (DEV mode)</h3>
+  <div class="mock">
+    <div style="width:240px;">
+      <div class="row-flex" style="background:var(--panel); padding:10px; border-radius:6px; flex-direction:column; gap:0;">
+        <div class="row active" style="display:flex; justify-content:space-between; padding:8px;"><span><span style="color:var(--green)">●</span> zemaster</span><span class="ago">1h</span></div>
+        <div class="row" style="display:flex; justify-content:space-between; padding:8px;"><span><span style="color:var(--dim)">○</span> MultiTerm <span class="ports-chip mono">:3000 :8000</span></span><span class="ago">16h</span></div>
+        <div class="row" style="display:flex; justify-content:space-between; padding:8px;"><span><span style="color:var(--red)">●</span> Stocks</span><span class="ago">2m</span></div>
+        <div class="row" style="display:flex; justify-content:space-between; padding:8px;"><span><span style="color:var(--yellow)">●</span> PM</span><span class="ago">14h</span></div>
+      </div>
+    </div>
+  </div>
+  <h3>Lifecycle filter — Archived hidden by default, accessible via filter</h3>
+  <div class="mock">
+    <div style="display:flex; gap:8px; align-items:flex-start;">
+      <div class="sidebar-mock">
+        <div style="display:flex; gap:4px; margin-bottom:8px; font-size:9px;">
+          <div style="background:var(--accent-strong); color:#fff; padding:4px 8px; border-radius:3px; font-weight:600;">DEV</div>
+          <div style="background:var(--panel); color:var(--muted); padding:4px 8px; border-radius:3px;">PROD</div>
+          <div style="background:var(--panel); color:var(--muted); padding:4px 8px; border-radius:3px;">▢ Archived</div>
+        </div>
+        <div class="row"><span><span style="color:var(--green)">●</span> zemaster</span><span class="ago">1h</span></div>
+        <div class="row"><span><span style="color:var(--dim)">○</span> MultiTerm</span><span class="ago">16h</span></div>
+      </div>
+      <p style="flex:1; font-size:13px;">Top of sidebar shows a 3-position selector: <strong>DEV</strong> (default), <strong>PROD</strong>, and a small <strong>▢ Archived</strong> filter checkbox. The DEV/PROD toggle drives the global app mode (also visible as the top-of-app toggle, see §4); Archived is independent, can overlay onto either mode.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ───── 4. TOGGLE ───── -->
+<section id="toggle">
+  <h2>4. Top-of-app DEV/PROD toggle</h2>
+  <p>Switches the global view. Each project lives in exactly one mode at a time; the toggle filters which set is visible.</p>
+  <div class="row-flex" style="gap:16px;">
+    <div class="mock" style="flex:1;">
+      <div class="mock-title">DEV mode active</div>
+      <div class="toggle">
+        <div class="seg active dev">DEV</div>
+        <div class="seg">PROD</div>
+      </div>
+    </div>
+    <div class="mock" style="flex:1;">
+      <div class="mock-title">PROD mode active</div>
+      <div class="toggle">
+        <div class="seg">DEV</div>
+        <div class="seg active prod">PROD</div>
+      </div>
+    </div>
+  </div>
+  <div class="note">Per-project "Switch to PROD/DEV" button moves the project AND auto-flips the global toggle so the project stays visible after the switch.</div>
+</section>
+
+<!-- ───── 5. TERMINAL TABS ───── -->
+<section id="tabs">
+  <h2>5. Terminal tabs within a project (DEV mode)</h2>
+  <p>Browser-tab style — one terminal at a time. Each tab shows status dot + terminal name. <strong>+</strong> opens a fresh shell in the project folder.</p>
+  <div class="mock">
+    <div class="mock-title">zemaster — 4 terminals open</div>
+    <div class="tabs">
+      <div class="tab active"><span style="color:var(--yellow)">●</span> backend</div>
+      <div class="tab inactive"><span style="color:var(--green)">●</span> frontend</div>
+      <div class="tab inactive"><span style="color:var(--red)">●</span> migration</div>
+      <div class="tab inactive"><span style="color:var(--dim)">○</span> npm dev</div>
+      <div class="tab inactive" style="background:transparent; color:var(--accent);">+</div>
+    </div>
+    <div class="term" style="height:160px;">$ claude<br/><span style="color:var(--yellow)">● Plan agent</span> · skill: brainstorming · model: opus-4-7 · 12.4k tok<br/>⏵ Last tool: Read(docs/architecture.md)<br/>⏵ Reading docs/architecture.md<br/>⏵ Found 12 references in 4 files<br/><br/>I have 3 questions before I can finish the plan...<br/><span style="color:var(--blue)">awaiting your input ▌</span></div>
+  </div>
+  <div class="note"><strong>Claude awareness panel (L2)</strong> — when <code>claude</code> is detected in a tab, the header shows: active agent · skill · model · last tool · token usage. Generic terminals (<code>npm dev</code>, etc.) show only the status dot and process name.</div>
+</section>
+
+<!-- ───── 6. PROD VIEW ───── -->
+<section id="prod">
+  <h2>6. PROD project view</h2>
+  <p>Minimal UI when a project is in PROD mode. No terminal multiplexer, no file tree by default — just launch + status + URLs.</p>
+  <div class="mock">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+      <div>
+        <div style="font-size:18px; font-weight:600;">🚀 Budget tracker</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:2px;">~/Claude/budget-tracker · last opened 12m ago</div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <div class="btn primary-blue mono" style="font-size:11px;">⇄ Switch to DEV</div>
+        <div class="btn secondary mono" style="font-size:11px;">…</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div class="panel-label">Status</div>
+        <div style="font-size:12px; color:var(--green);">● running · http://localhost:5173 · uptime 4m</div>
+      </div>
+      <div class="row-buttons">
+        <div class="btn primary-purple">▶ Open in browser</div>
+        <div class="btn secondary">■ Stop</div>
+        <div class="btn secondary">↻ Restart</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">Run command</div>
+      <div class="term" style="padding:8px 12px;">$ npm run dev</div>
+      <div style="font-size:11px; color:var(--dim); margin-top:6px;">Edit · auto-launch on app start: ☐ <span style="color:var(--dim)">(out of MVP)</span></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">URLs</div>
+      <div class="url-row">🟢 <span style="color:var(--accent)">http://localhost:5173</span> · local · running</div>
+      <div class="url-row">⚫ <span style="color:var(--accent)">https://budget.lou.dev</span> · prod · last checked 1h</div>
+      <div style="font-size:11px; color:var(--dim); margin-top:6px;">+ add URL</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">Note</div>
+      <div style="font-size:13px;">Personal monthly budget tracker. Deployed at budget.lou.dev. Run locally with <code>npm run dev</code>.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── 7. PROMOTION ───── -->
+<section id="promotion">
+  <h2>7. DEV→PROD promotion validation dialog</h2>
+  <p>When user clicks "Switch to PROD" on a DEV project, app runs pre-flight checks. If anything blocks, show this modal.</p>
+
+  <div class="row-flex" style="gap:16px; align-items:flex-start;">
+    <div class="mock" style="flex:1;">
+      <div class="mock-title">All checks pass — silent transition</div>
+      <div style="background:var(--panel); padding:14px; border-radius:8px;">
+        <div class="check-row pass"><span class="icon">✓</span><span>Run command is defined and target exists</span></div>
+        <div class="check-row pass"><span class="icon">✓</span><span>Declared ports don't conflict with other PROD projects</span></div>
+        <div class="check-row pass"><span class="icon">✓</span><span>At least one URL is set</span></div>
+        <div class="check-row warn"><span class="icon">⚠</span><span style="color:var(--muted)">No note set (non-blocking)</span></div>
+        <div style="margin-top:14px; display:flex; gap:8px;">
+          <div class="btn primary-purple">Promote to PROD</div>
+          <div class="btn secondary">Cancel</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mock" style="flex:1;">
+      <div class="mock-title">Blocker — fix needed</div>
+      <div style="background:var(--panel); padding:14px; border-radius:8px;">
+        <div class="check-row pass"><span class="icon">✓</span><span>At least one URL is set</span></div>
+        <div class="check-row fail"><span class="icon">✗</span><span><strong style="color:var(--red)">Run command points to ./start.sh — file doesn't exist</strong></span></div>
+        <div class="check-row fail"><span class="icon">✗</span><span><strong style="color:var(--red)">Port 3000 conflicts with "Stocks" (PROD)</strong></span></div>
+        <div style="margin-top:14px; padding:10px; background:var(--bg-2); border-radius:4px; font-size:12px;">📘 <a href="#" style="color:var(--accent)">Open PROD setup guide</a></div>
+        <div style="margin-top:14px; display:flex; gap:8px;">
+          <div class="btn secondary" style="opacity:0.5;">Promote to PROD</div>
+          <div class="btn secondary">Cancel</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="note">A bundled MD doc <code>docs/prod-setup-guide.md</code> ships with the app and is deep-linked from the failure dialog.</div>
+</section>
+
+<!-- ───── 8. PORTS ───── -->
+<section id="ports">
+  <h2>8. Port management — chip, panel, conflict UX, global view</h2>
+  <p>Each project declares expected ports. App polls <code>lsof -iTCP -sTCP:LISTEN</code> at ~1–2s, matching PIDs to spawned processes.</p>
+
+  <h3>8a. Per-project ports chip on sidebar pill</h3>
+  <div class="mock">
+    <div style="width:240px;">
+      <div class="row" style="background:var(--border); padding:8px; display:flex; justify-content:space-between;">
+        <span><span style="color:var(--green)">●</span> zemaster <span class="ports-chip mono">:3000 :8000</span></span>
+        <span class="ago">1h</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>8b. Per-project Ports panel inside project view</h3>
+  <div class="mock">
+    <div class="panel-label">Ports — zemaster</div>
+    <table style="width:100%; font-size:12px; border-collapse:collapse;">
+      <thead style="color:var(--muted); font-size:10px; text-transform:uppercase;">
+        <tr style="border-bottom:1px solid var(--border);"><th style="text-align:left; padding:6px;">Port</th><th style="text-align:left; padding:6px;">PID</th><th style="text-align:left; padding:6px;">Process</th><th style="text-align:left; padding:6px;">Owning terminal</th><th style="text-align:left; padding:6px;">Since</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border);"><td class="mono" style="padding:6px;">3000</td><td class="mono" style="padding:6px;">12453</td><td class="mono" style="padding:6px;">node (vite)</td><td style="padding:6px;">frontend</td><td style="padding:6px;">4m</td><td></td></tr>
+        <tr style="border-bottom:1px solid var(--border);"><td class="mono" style="padding:6px;">8000</td><td class="mono" style="padding:6px;">12891</td><td class="mono" style="padding:6px;">python (uvicorn)</td><td style="padding:6px;">backend</td><td style="padding:6px;">3m</td><td></td></tr>
+        <tr style="color:var(--dim);"><td class="mono" style="padding:6px;">5173</td><td class="mono" style="padding:6px;">9912</td><td class="mono" style="padding:6px;">node (orphan)</td><td style="padding:6px;">—</td><td style="padding:6px;">2h</td><td style="padding:6px;"><span class="btn secondary" style="font-size:10px; padding:4px 8px;">Kill</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>8c. Conflict UX — auto-suggest next free port</h3>
+  <div class="mock">
+    <div style="background:var(--panel); padding:14px; border-radius:8px;">
+      <div style="font-weight:600; color:var(--yellow); margin-bottom:8px;">⚠ Port 3000 already in use</div>
+      <p style="margin-bottom:12px; color:var(--text);">Bound by <strong>zemaster</strong> (PID 12453, vite). Suggesting next free port: <strong class="mono" style="color:var(--green)">3001</strong></p>
+      <div style="display:flex; gap:8px;">
+        <div class="btn primary-blue">Use 3001</div>
+        <div class="btn secondary">Pick another</div>
+        <div class="btn secondary">Cancel launch</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>8d. Global Ports view — palette / overlay across all projects</h3>
+  <div class="mock">
+    <div style="background:var(--panel); padding:14px; border-radius:8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div style="font-weight:600;">All bound ports — 3 projects</div>
+        <div style="font-size:11px; color:var(--muted);">⌘⇧P</div>
+      </div>
+      <table style="width:100%; font-size:12px; border-collapse:collapse;">
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);"><td class="mono" style="padding:6px;">3000</td><td style="padding:6px;">zemaster</td><td style="padding:6px;">vite</td><td style="padding:6px; color:var(--green);">✓ matches declared</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td class="mono" style="padding:6px;">8000</td><td style="padding:6px;">zemaster</td><td style="padding:6px;">uvicorn</td><td style="padding:6px; color:var(--green);">✓ matches declared</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td class="mono" style="padding:6px;">5173</td><td style="padding:6px;">Budget tracker (PROD)</td><td style="padding:6px;">vite</td><td style="padding:6px; color:var(--green);">✓ matches declared</td></tr>
+          <tr style="color:var(--yellow);"><td class="mono" style="padding:6px;">9092</td><td style="padding:6px;">— orphan</td><td style="padding:6px;">node</td><td style="padding:6px;">⚠ untracked process</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ───── 9. TRAY ───── -->
+<section id="tray">
+  <h2>9. Mac menu bar tray widget</h2>
+  <p>Glance-able status from any app. Tray icon shows the app logo + a red dot when any DEV terminal needs attention + a badge count of pending DEV projects. Click the icon to open the popover.</p>
+
+  <h3>9a. Tray icon states</h3>
+  <div class="mock">
+    <div style="display:flex; gap:24px; align-items:center;">
+      <div>
+        <div class="tray-icon">⌘ MultiTerm</div>
+        <div style="font-size:11px; color:var(--muted); margin-top:6px;">Idle — nothing pending</div>
+      </div>
+      <div>
+        <div class="tray-icon">⌘ MultiTerm <span style="color:var(--red);">●</span></div>
+        <div style="font-size:11px; color:var(--muted); margin-top:6px;">Something needs you, count not shown</div>
+      </div>
+      <div>
+        <div class="tray-icon">⌘ MultiTerm <span class="tray-badge">3</span></div>
+        <div style="font-size:11px; color:var(--muted); margin-top:6px;">3 DEV projects with pending state</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>9b. Popover — DEV projects only, ClaudeMate-style</h3>
+  <div class="mock">
+    <div class="popover-mock">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:0 4px;">
+        <div style="font-weight:600; font-size:14px;">MultiTerm</div>
+        <div style="font-size:11px; color:var(--muted);">10 projects</div>
+      </div>
+      <div class="pills-row">
+        <div class="popover-pill selected"><span style="color:#fff">●</span> zemaster <span style="opacity:0.7; margin-left:4px;">1h</span></div>
+        <div class="popover-pill"><span style="color:var(--dim)">○</span> MultiTerm <span style="color:var(--dim); margin-left:4px;">just now</span></div>
+        <div class="popover-pill"><span style="color:var(--red)">●</span> Stocks <span style="color:var(--dim); margin-left:4px;">2m</span></div>
+        <div class="popover-pill"><span style="color:var(--yellow)">●</span> PM <span style="color:var(--dim); margin-left:4px;">14h</span></div>
+      </div>
+
+      <div style="margin-top:14px; padding:12px; background:var(--bg-2); border-radius:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <div style="font-weight:600;">zemaster <span style="font-size:10px; color:var(--muted); background:var(--panel); padding:2px 6px; border-radius:3px; margin-left:6px;">awaiting</span></div>
+          <div style="font-size:11px; color:var(--muted);">46.1k · 18%</div>
+        </div>
+        <div style="font-size:11px; color:var(--dim); font-family:monospace; margin-bottom:8px;">~/Claude/zemaster</div>
+        <div style="font-size:13px; color:var(--text); padding:8px; background:var(--panel); border-radius:6px;">Plan agent — 3 questions before plan can finish: Should the gateway...</div>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Click behavior:</strong> single-click a pill = expand details inline (preview, tokens, path) like above. Double-click = focus main app on that project. PROD and ARCHIVED projects do NOT appear here — only DEV projects (since those are the ones with changing state).</div>
+</section>
+
+<footer style="max-width:1080px; margin:48px auto 0; color:var(--dim); font-size:12px; text-align:center;">
+  Design Reference v1 — generated from brainstorm dialogue 2026-04-28. Update version on substantive design changes.
+</footer>
+
+</body>
+</html>
