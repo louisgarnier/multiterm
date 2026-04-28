@@ -13,7 +13,9 @@ Usage:
     python scripts/git_ops.py checkout <branch>
     python scripts/git_ops.py diff
     python scripts/git_ops.py remote_add <name> <url>
-    python scripts/git_ops.py remotes                 # list configured remotes
+    python scripts/git_ops.py remote_set_url <name> <url>  # change a remote's URL
+    python scripts/git_ops.py remote_remove <name>          # remove a remote
+    python scripts/git_ops.py remotes                       # list configured remotes
 """
 
 import subprocess
@@ -91,6 +93,16 @@ def remote_add(name: str, url: str) -> None:
     run(["git", "remote", "add", name, url])
 
 
+def remote_set_url(name: str, url: str) -> None:
+    """Change an existing remote's URL."""
+    run(["git", "remote", "set-url", name, url])
+
+
+def remote_remove(name: str) -> None:
+    """Remove a remote."""
+    run(["git", "remote", "remove", name])
+
+
 def remotes() -> None:
     """List configured remotes."""
     run(["git", "remote", "-v"])
@@ -133,6 +145,8 @@ COMMANDS = {
     "checkout": (checkout, 1, False),
     "diff": (diff, 0, False),
     "remote_add": (remote_add, 2, False),
+    "remote_set_url": (remote_set_url, 2, False),
+    "remote_remove": (remote_remove, 1, False),
     "remotes": (remotes, 0, False),
 }
 
